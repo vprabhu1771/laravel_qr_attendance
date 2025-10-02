@@ -45,4 +45,9 @@ class EventResource extends Resource
             'edit' => EditEvent::route('/{record}/edit'),
         ];
     }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
 }
