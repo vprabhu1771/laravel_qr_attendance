@@ -8,6 +8,10 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
+use Filament\Actions\Action;
+
+use App\Models\Event;
+
 class EventsTable
 {
     public static function configure(Table $table): Table
@@ -35,6 +39,11 @@ class EventsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make("View QR")
+                        ->icon('heroicon-o-document')
+                        // ->url("https://www.google.com")
+                        ->url(fn(Event $record) => route('generateQrCode', $record->id))
+                        ->openUrlInNewTab(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
