@@ -57,6 +57,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the given mobile number is registered.
+     *
+     * @param  string  $mobileNumber
+     * @return bool
+     */
+    public function isMobileNoRegistered($mobile_no)
+    {
+        return $this->where('mobile_no', $mobile_no)->exists();
+    }
+
+    /**
      * Define a one-to-many relationship with the Attendance model.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
