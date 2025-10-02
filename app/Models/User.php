@@ -55,4 +55,14 @@ class User extends Authenticatable
     public function getAvatarAttribute() {
         return "https://gravatar.com/avatar/" . md5( strtolower( trim( $this-> email) ) );
     }
+
+    /**
+     * Define a one-to-many relationship with the Attendance model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */   
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }
