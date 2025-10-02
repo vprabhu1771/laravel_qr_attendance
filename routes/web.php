@@ -8,4 +8,8 @@ Route::get('/', function () {
 
 use App\Http\Controllers\QRController;
 
-Route::get('/generate-qr-code/{eventId}', [QRController::class, 'generateQrCode'])->name('generateQrCode');;
+Route::get('/generate-qr-code/{eventId}', [QRController::class, 'generateQrCode'])->name('generateQrCode');
+
+use App\Http\Controllers\ReportController;
+
+Route::get('/generate-report', [ReportController::class, 'generateReport']);
