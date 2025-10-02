@@ -7,12 +7,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-use App\Http\Controllers\api\v2\UserController;
+use App\Http\Controllers\api\UserController;
 
 Route::post('/user/isMobileNumberRegistered', [UserController::class, 'isMobileNumberRegistered']);
 
 
-use App\Http\Controllers\api\v2\AuthController;
+use App\Http\Controllers\api\AuthController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -29,7 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 Route::post('/mark-attendance/{eventId}', [QRController::class, 'markAttendance']);
 
-use App\Http\Controllers\api\v2\AttendanceController;
+use App\Http\Controllers\api\AttendanceController;
 
 Route::get('/attendances', [AttendanceController::class, 'index']);
 
