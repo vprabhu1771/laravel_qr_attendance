@@ -26,3 +26,28 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/upload-profile-pic', [AuthController::class, 'upload']);
 });
+
+Route::post('/mark-attendance/{eventId}', [QRController::class, 'markAttendance']);
+
+use App\Http\Controllers\api\v2\AttendanceController;
+
+Route::get('/attendances', [AttendanceController::class, 'index']);
+
+
+// Route::post('/mark-attendance/{eventId}', [AttendanceController::class, 'markAttendance']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // Routes for authenticated users only
+
+    Route::post('/mark-attendance/{eventId}', [AttendanceController::class, 'markAttendance']);
+
+    // Mark attendance for the current user (present or absent)
+    // Route::post('/attendance', [AttendanceController::class, 'markAttendance']);
+
+    // Get attendance history for the current user
+    Route::get('/attendance/history', [AttendanceController::class, 'getAttendanceHistory']);
+
+    
+});
+
+Route::post('/attendance/generate-qrcode', [AttendanceController::class, 'generateQrCode']);
