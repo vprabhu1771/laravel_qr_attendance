@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\v2;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
@@ -87,6 +87,7 @@ class AttendanceController extends Controller
                 return response()->json(['message' => $result . 'Attendance marked successfully'], 201);
             }            
             else {
+                print($qrData['event_id'] == $event->id);
                 return response()->json(['message' => 'Attendance already marked'], 200);
             }            
         } else {

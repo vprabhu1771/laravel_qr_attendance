@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\api\v2;
+namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -15,12 +15,12 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'mobile_number' => 'required|numeric|digits:10', // Assuming 10-digit mobile number
+                'mobile_no' => 'required|numeric|digits:10', // Assuming 10-digit mobile number
                 'password' => 'required',
                 'device_name' => 'required',
             ]);
         
-            $user = User::where('mobile_number', $request->mobile_number)->first();
+            $user = User::where('mobile_no', $request->mobile_no)->first();
             
             // $request->validate([
             //     'email' => 'required|email',
@@ -32,7 +32,7 @@ class AuthController extends Controller
         
             if (!$user || !Hash::check($request->password, $user->password)) {
                 throw ValidationException::withMessages([
-                    'mobile_number' => ['The provided credentials are incorrect.'],
+                    'mobile_no' => ['The provided credentials are incorrect.'],
                 ]);
             }
         
