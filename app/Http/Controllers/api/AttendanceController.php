@@ -46,54 +46,68 @@ class AttendanceController extends Controller
 
     public function markAttendance(Request $request, $eventId)
     {
-        // Retrieve the event based on the provided event ID
+        // 1) Ensure event exists
         $event = Event::find($eventId);
+        if (! $event) {
+            return response()->json(['message' => 'Event not found'], 404);
+        }
 
-        // Extract information from the JSON payload
-        $qrData = $request->json('qr_data'); // Assuming 'qr_data' is the key in the JSON payload
-
-        // Validate the structure of the QR code data
-        $validator = Validator::make($qrData, [
-            'event_id' => 'required|integer',
-            'event_name' => 'required|string',
-            'event_date' => 'required|date',
-            'event_location' => 'required|string',
+        // 2) Validate nested JSON: use dot keys to validate qr_data.*
+        $validated = $request->validate([
+            'qr_data.event_id'       => 'required|integer',
+            'qr_data.event_name'     => 'required|string',
+            'qr_data.event_date'     => 'required|date',
+            'qr_data.event_location' => 'required|string',
         ]);
 
-        // If validation fails, throw a ValidationException
-        if ($validator->fails()) {
-            throw ValidationException::withMessages(['qr_data' => 'Invalid QR code data structure']);
+        $qrData = $validated['qr_data'];
+
+        // 3) Check QR matches the event
+        if ((int)$qrData['event_id'] !== (int)$event->id) {
+            return response()->json(['message' => 'Invalid QR code for the event'], 400);
         }
 
-        // Check if the QR code matches the event
-        if ($qrData['event_id'] == $event->id) {
-            // Check if the user has already marked attendance for this event
-            $userId = auth()->user()->id; // Assuming you have user authentication
-
-            // Find the attendance record for the user
-            $attendance = Attendance::where('user_id', $userId)->first();
-
-            $existingAttendance = Attendance::where('user_id', $userId)
-                ->where('event_id', $event->id)
-                // Add this line to check 'attendance_time' is not null
-                ->whereNotNull('attendance_time') 
-                ->first();
-
-            // Check if attendance record is found and 'attendance_time' is not null
-            if ($attendance && $attendance->attendance_time == null) {
-                // Update the 'attendance_time' field with the current timestamp
-                $result = $attendance->update(['attendance_time' => now()]);                
-
-                return response()->json(['message' => $result . 'Attendance marked successfully'], 201);
-            }            
-            else {
-                print($qrData['event_id'] == $event->id);
-                return response()->json(['message' => 'Attendance already marked'], 200);
-            }            
-        } else {
-            return response()->json(['message' => 'Invalid QR code for the event']);
+        // 4) Auth check
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
+
+        // 5) Find attendance for this user+event
+        $attendance = Attendance::where('user_id', $user->id)
+                                ->where('event_id', $event->id)
+                                ->first();
+
+        // 6) If found and already marked -> return
+        if ($attendance && $attendance->attendance_time !== null) {
+            return response()->json(['message' => 'Attendance already marked'], 200);
+        }
+
+        // 7) If found but attendance_time is null -> update it
+        if ($attendance) {
+            $attendance->attendance_time = now();
+            $attendance->save();
+
+            return response()->json([
+                'message' => 'Attendance marked successfully',
+                'attendance_time' => $attendance->attendance_time
+            ], 201);
+        }
+
+        // 8) If not found -> create new attendance record and set time
+        $new = Attendance::create([
+            'user_id' => $user->id,
+            'event_id' => $event->id,
+            'attendance_time' => now(),
+            // add other fields if required
+        ]);
+
+        return response()->json([
+            'message' => 'Attendance marked successfully',
+            'attendance_time' => $new->attendance_time
+        ], 201);
     }
+
 
     public function getAttendanceHistory(Request $request)
     {
